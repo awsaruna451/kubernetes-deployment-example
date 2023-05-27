@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bank-app-backend-service
+spec:
+  selector:
+    app: bank-application-backend
+  ports:
+  - protocol: TCP
+    port: 8181
+    targetPort: 8181
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bank-application-deployment
+spec:
+  selector:
+    matchLabels:
+      app: bank-application-backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bank-application-backend
+    spec:
+      containers:
+        - name: bank-application-backend
+          image: aruna451/bankappbackend:1.0.1
+          ports:
+            - containerPort: 8181
+          env:
+            - name: DB_HOST
+              value: bank-app-mysql-service
+            - name: DB_NAME
+              value: abcbank
+            - name: DB_USERNAME
+              value: root
+            - name: DB_PASSWORD
+              value: abc123
+          envFrom:
+            - configMapRef:
+                name: bank-application-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bank-application-config
+data:
+  application.properties: |
+    spring.datasource.url=jdbc:mysql://bank-app-mysql-service:3306/abcbank?allowPublicKeyRetrieval=true&useSSL=false
+    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+    spring.jpa.hibernate.ddl-auto=update
+    server.port=8181
+    facility.request.type=PERSONAL_LOAN
+    facility.request.rate=5
+
+         
+
+
+
+        

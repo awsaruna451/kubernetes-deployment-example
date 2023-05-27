@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-workbench-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-workbench
+  template:
+    metadata:
+      labels:
+        app: mysql-workbench
+    spec:
+      containers:
+        - name: mysql-workbench
+          image: mysql-workbench:latest
+          command: ["/bin/bash", "-c"]
+          args: ["sleep infinity"]
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/mysql
+          env:
+            - name: MYSQL_HOST
+              value: bank-app-mysql-service
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_USER
+              value: root
+            - name: MYSQL_PASSWORD
+              value: abc123
+      volumes:
+        - name: config-volume
+          emptyDir: {}
